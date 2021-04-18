@@ -1,0 +1,4 @@
+numpy==1.20.2
+pandas==1.2.0
+trading-ig==0.0.9
+
