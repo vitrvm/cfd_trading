@@ -37,6 +37,10 @@ class Broker(object):
     }
 
     def __init__(self, config={}):
+        """
+        Each broker has a unique config configuration. Referr to class.__doc__ for more information.
+        """
+
         settings = self.load_config(self.describe(), config)
 
         for key in settings:
@@ -54,15 +58,15 @@ class Broker(object):
     def describe(self):
         return {}
 
-    def load_accounts(self, refresh=False, params={}):
+    def load_accounts(self, refresh=False, params={})->Accounts:
         if refresh:
             self.accounts = self.fetch_accounts(params)
         else:
-            if self.accounts:
-                return self.accounts.get_accounts()
+            if self.accounts is not None:
+                return self.accounts
             else:
                 self.accounts = self.fetch_accounts(params)
-        return self.accounts.get_accounts()
+        return self.accounts
 
     def check_required_credentials(self, error=True):
         keys = list(self.requiredCredentials.keys())
@@ -77,6 +81,12 @@ class Broker(object):
         raise NotSupported(f'{self.name} start_session() pure method must be redefined in derived classes')
 
     def fetch_accounts(self)->Accounts:
+        raise NotImplementedError(f'fetch_accounts not implemented in derived class')
+
+    def fetch_balance(self, account=None, refresh=False)->dict:
+        """
+        Returns dict {'balance'
+        """
         raise NotImplementedError(f'fetch_accounts not implemented in derived class')
 
     def fetch_ohlcv(self, symbol, timeframe='1m', limit=20, params={})->pd.DataFrame:

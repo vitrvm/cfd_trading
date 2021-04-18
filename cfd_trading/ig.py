@@ -8,6 +8,33 @@ import pandas as pd
 
 
 class IG(Broker):
+
+    """
+    A class for IG Trading Broker ig.com. 
+
+    To init class must pass config param:
+    
+    Example:
+        config = {
+        'login': your_login,
+        'password': your_password,
+        'apiKey': your_apiKey,
+        'accType': 'DEMO' or 'LIVE',
+        'account': your_account_number
+        }
+
+        cfd_trading.IG(config)
+
+    Methods
+    -------
+
+    load_accounts(refresh=False, params={})
+        Returns accounts as a list. If refresh true, reloads account data from broker. This is the preferred way to access Accounts.
+    fetch_accounts()
+        Returns Accounts class.
+    fetch_ohlcv(symbol, timeframe='1m', limit=20)
+        Returns pandas.Dataframe with open/high/low/close/volume for a given symbol and timeframe
+    """
     
     session: IGService
 
@@ -44,6 +71,11 @@ class IG(Broker):
                 'NDX100': 'IX.D.NASDAQ.IFE.IP',
                 'SP500': 'IX.D.SPTRD.IFE.IP',
                 'EURUSD': 'CS.D.EURUSD.MINI.IP'
+            },
+
+            'currencies': {
+                'EUR': 'EUR',
+                'USD': 'USD'
             }
 
         })
@@ -60,9 +92,9 @@ class IG(Broker):
 
             if v['accountType'] == 'CFD':
                 acc.accType = Account.Type.CFD
-            elif v['accoundType'] == 'PHYSICAL':
+            elif v['accountType'] == 'PHYSICAL':
                 acc.accType = Account.Type.PHYSICAL
-            elif v['accoundType'] == 'SPREADBET':
+            elif v['accountType'] == 'SPREADBET':
                 acc.accType = Account.Type.SPREADBET
             else:
                 acc.accType = Account.Type.UNKNOWN
@@ -71,7 +103,23 @@ class IG(Broker):
             acc.currency = v['currency']
             accounts.add_account(acc)
         return accounts
-            
+
+    def fetch_balance(self, account=None, refresh=False) -> dict:
+        if account is None:
+            if self.current_account is None or self.accounts is None:
+                self.load_accounts()    
+            acc = self.current_account
+        
+        return_acc = self.accounts.get_account_by_id(id=acc)
+        
+        params = {
+            'balance': return_acc.balance,
+            'currency': self.currencies[return_acc.currency]
+        }
+
+        return params
+        
+
     def fetch_ohlcv(self, symbol, timeframe='1m', limit=20, params={})->pd.DataFrame:
         bars = pd.DataFrame(columns=['open', 'high', 'low', 'close', 'volume'])
         
@@ -190,6 +238,7 @@ class IGMonitor(BasicMonitor):
         df = pd.DataFrame({'datetime': utm, 'open': open, 'high': high, 'low': low, 'close': close, 'volume': volume}, index=[0])
         pd.to_datetime(df['datetime'],unit='ms')
         df.set_index(['datetime'], inplace=True)
+        df.index = pd.to_datetime(df.index, unit='ms')
         
         self.__last_tick = df
         
@@ -203,5 +252,6 @@ class IGMonitor(BasicMonitor):
         
     
 
-
-
+__doc__ = """
+Test Documentation
+"""

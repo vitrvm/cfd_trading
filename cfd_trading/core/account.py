@@ -27,10 +27,7 @@ class Accounts(object):
     def add_account(self, acc:Account):
         self.accounts.append(acc)
 
-    def get_accounts(self):
-        return self.accounts
-
-    def get_account_by_id(self, id):
+    def get_account_by_id(self, id) -> Account:
         if self.accounts is not None:    
             for acc in self.accounts:
                 if id == acc.id:
