@@ -1,3 +1,4 @@
+from cfd_trading import indicators
 from cfd_trading.core import monitor
 from cfd_trading.core.broker import Broker
 
@@ -9,7 +10,7 @@ from cfd_trading.core.errors import BrokerError
 from cfd_trading.core.errors import AuthenticationError
 from cfd_trading.core.errors import NotSupported
 
-#from cfd_trading.ig import IGService
+from cfd_trading.indicators import supertrend
 
 from cfd_trading.ig import IG, IGMonitor
 
@@ -23,4 +24,8 @@ core = [
     'BasicMonitor'
 ]
 
-__all__ = core + errors.__all__ + brokers + monitors
+indicators = [
+    'supertrend',
+    ]
+
+__all__ = core + errors.__all__ + brokers + monitors + indicators

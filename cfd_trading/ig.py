@@ -1,6 +1,7 @@
 from cfd_trading.core.broker import Broker
 from cfd_trading.core.monitor import BasicMonitor
 from cfd_trading.core.account import Account, Accounts
+from cfd_trading.core.order import Order
 
 from trading_ig import IGService
 
@@ -79,6 +80,54 @@ class IG(Broker):
             }
 
         })
+
+    def create_order(self, symbol: str, type_:Order.Type, action: Order.Action, quantity:float, level=None, stop_distance=None, stop_level=None, limit_distance=None, limit_level=None, trailing_stop=False, trailing_stop_increment=None, guaranteed_stop=False, good_till_date=None, quote_id=None, force_open=False):
+
+        #force_open = True if limit_distance is not None or limit_level is not None or stop_distance is not None or stop_level is not None else False
+        
+        if limit_distance is not None or limit_level is not None or stop_distance is not None or stop_level is not None:
+            assert(force_open)
+        if guaranteed_stop:
+            assert((stop_level is None and type(stop_distance) in [float, int]) or (stop_distance is None and type(stop_level) in [float, int]))
+        if type_ is Order.Type.LIMIT:
+            assert(quote_id is None)
+            assert(type(level) is float)
+        if type_ is Order.Type.MARKET:
+            assert(level is None)
+            assert(quote_id is None)
+        if not trailing_stop:
+            assert(trailing_stop_increment is None)
+        if trailing_stop:
+            assert(stop_level is None)
+            assert(not guaranteed_stop)
+            assert(type(stop_distance) is float and type(trailing_stop_increment) is float)
+        #set only one
+        assert(limit_distance is None or limit_level is None)
+        assert(stop_distance is None or stop_level is None)
+
+        instrument = self.session.fetch_market_by_epic(epic=self.symbols[symbol])
+
+        if type_ is Order.Type.MARKET:
+            params = {
+                "currency_code": instrument['instrument']['currencies'][0]['code'],
+                "direction": action,
+                "epic": self.symbols[symbol],
+                "expiry": instrument['instrument']['expiry'],
+                "force_open": force_open,
+                "guaranteed_stop": guaranteed_stop,
+                "level": level,
+                "limit_distance": limit_distance,
+                "limit_level": limit_level,
+                "order_type": type_,
+                "quote_id": quote_id,
+                "size": quantity,
+                "stop_distance": stop_distance,
+                "stop_level": stop_level,
+                "trailing_stop": trailing_stop,
+                "trailing_stop_increment": trailing_stop_increment,
+            }
+            print(params)
+            return self.session.create_open_position(**params)
 
     def fetch_accounts(self, params={}):
         accounts = Accounts()
@@ -203,9 +252,12 @@ class IGMonitor(BasicMonitor):
             'DAY_LOW'
             ]
 
-    def __init__(self, broker:IG, symbols:list, timeframe='1m') -> None:
+    def __init__(self, broker:IG, symbols:list, timeframe='1m', bars:pd.DataFrame=None) -> None:
         
         self.broker = broker
+
+        if type(bars) is pd.DataFrame:
+            self.__bars = bars[:-1]
         
         for i in symbols:
             self.items.append(f"CHART:{self.broker.symbols[i]}:{self.timeframes[timeframe]}")
@@ -228,30 +280,37 @@ class IGMonitor(BasicMonitor):
     def on_update(self, items):
         data = items['values']
         #['open', 'high', 'low', 'close', 'volume']
-        utm = int(data['UTM'])
-        open = (float(data['BID_OPEN'])+float(data['OFR_OPEN']))/2
-        high = (float(data['BID_HIGH'])+float(data['OFR_HIGH']))/2
-        low = (float(data['BID_LOW'])+float(data['OFR_LOW']))/2
-        close = (float(data['BID_CLOSE'])+float(data['OFR_CLOSE']))/2
-        volume = float(data['LTV'])
-        
-        df = pd.DataFrame({'datetime': utm, 'open': open, 'high': high, 'low': low, 'close': close, 'volume': volume}, index=[0])
-        pd.to_datetime(df['datetime'],unit='ms')
-        df.set_index(['datetime'], inplace=True)
-        df.index = pd.to_datetime(df.index, unit='ms')
-        
-        self.__last_tick = df
-        
-        if int(data['CONS_END']):
-            if isinstance(self.__bars, pd.DataFrame) and isinstance(df, pd.DataFrame):
-                self.__bars = self.__bars.append(df)
-            if self.__bars is None:
-                self.__bars = df
-            
-        
-        
-    
+        try:
+            if self.mode == 'MERGE':
+                    utm = int(data['UTM'])
+                    open = (float(data['BID_OPEN'])+float(data['OFR_OPEN']))/2
+                    high = (float(data['BID_HIGH'])+float(data['OFR_HIGH']))/2
+                    low = (float(data['BID_LOW'])+float(data['OFR_LOW']))/2
+                    close = (float(data['BID_CLOSE'])+float(data['OFR_CLOSE']))/2
+                    volume = float(data['LTV'])
+                    df = pd.DataFrame({'datetime': utm, 'open': open, 'high': high, 'low': low, 'close': close, 'volume': volume}, index=[0])
+            if self.mode == 'DISTINCT':
+                utm = int(data['UTM']) if data['UTM'] is not None else None
+                bid = float(data['BID']) if data['BID'] is not None else None
+                ask = float(data['OFR']) if data['OFR'] is not None else None
+                ltp = float(data['LTP']) if data['LTP'] is not None else None
+                ltv = float(data['LTV']) if data['LTV'] is not None else None
+                df = pd.DataFrame({'datetime': utm, 'bid': bid, 'ask': ask, 'ltp': ltp, 'ltv': ltv}, index=[0])
 
+            pd.to_datetime(df['datetime'],unit='ms')
+            df.set_index(['datetime'], inplace=True)
+            df.index = pd.to_datetime(df.index, unit='ms')
+            
+            self.__last_tick = df
+            
+            if ('CONS_END' in data.keys() and int(data['CONS_END'])==1) or ('CONS_END' not in data.keys()):
+                if isinstance(self.__bars, pd.DataFrame) and isinstance(df, pd.DataFrame):
+                    self.__bars = self.__bars.append(df)
+                if self.__bars is None:
+                    self.__bars = df
+        except:
+            pass
+        
 __doc__ = """
 Test Documentation
 """

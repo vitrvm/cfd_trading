@@ -77,16 +77,12 @@ class Broker(object):
                 raise AuthenticationError(f'requires `{key}`')
         return True
 
-    def start_session(self):
-        raise NotSupported(f'{self.name} start_session() pure method must be redefined in derived classes')
-
+    def create_order(self):
+        raise NotImplementedError(f'create_order not implemented in derived class')
     def fetch_accounts(self)->Accounts:
         raise NotImplementedError(f'fetch_accounts not implemented in derived class')
 
     def fetch_balance(self, account=None, refresh=False)->dict:
-        """
-        Returns dict {'balance'
-        """
         raise NotImplementedError(f'fetch_accounts not implemented in derived class')
 
     def fetch_ohlcv(self, symbol, timeframe='1m', limit=20, params={})->pd.DataFrame:
@@ -94,6 +90,9 @@ class Broker(object):
 
     def handle_errors(self, e):
         raise NotImplementedError(f'handle_errors not implemented in derived class')
+
+    def start_session(self):
+        raise NotSupported(f'{self.name} start_session() pure method must be redefined in derived classes')
 
     @staticmethod
     def load_config(*args):
