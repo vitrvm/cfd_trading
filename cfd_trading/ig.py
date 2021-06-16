@@ -6,6 +6,7 @@ from cfd_trading.core.order import Order
 from trading_ig import IGService
 
 import pandas as pd
+import numpy as np
 
 
 class IG(Broker):
@@ -179,12 +180,13 @@ class IG(Broker):
         response = self.session.fetch_historical_prices_by_epic_and_num_points(epic=symbol, resolution=resolution, numpoints=limit)
         
         df = response['prices']
+        print(df)
         
         bars['open'] = (df['bid']['Open']+df['ask']['Open'])/2
         bars['high'] = (df['bid']['High']+df['ask']['High'])/2
         bars['low'] = (df['bid']['Low']+df['ask']['Low'])/2
         bars['close'] = (df['bid']['Close']+df['ask']['Close'])/2
-        bars['volume'] = df['last']['Volume']
+        bars['volume'] = df['last']['Volume'] if 'last' in df.columns else np.nan
         bars.index.names = ['datetime']
         
         return bars
