@@ -131,3 +131,4 @@ dmypy.json
 # my files and directories
 .vscode
 test.py
+sma_strat.py
