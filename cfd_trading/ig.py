@@ -180,7 +180,6 @@ class IG(Broker):
         response = self.session.fetch_historical_prices_by_epic_and_num_points(epic=symbol, resolution=resolution, numpoints=limit)
         
         df = response['prices']
-        print(df)
         
         bars['open'] = (df['bid']['Open']+df['ask']['Open'])/2
         bars['high'] = (df['bid']['High']+df['ask']['High'])/2

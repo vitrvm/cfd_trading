@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from ta.volatility import AverageTrueRange
 
@@ -27,3 +28,4 @@ def supertrend(df:pd.DataFrame, period=10, multiplier=3)->pd.DataFrame:
             if not df['in_uptrend'][current] and df['st_upperband'][current] > df['st_upperband'][previous]:
                 df['st_upperband'][current] = df['st_upperband'][previous]
     return df
+
