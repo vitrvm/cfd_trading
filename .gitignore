@@ -129,6 +129,8 @@ dmypy.json
 .pyre/
 
 # my files and directories
+.DS_Store
 .vscode
+data/
 test.py
 test*
