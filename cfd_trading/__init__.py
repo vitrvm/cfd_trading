@@ -10,8 +10,9 @@ from cfd_trading.core.errors import BrokerError
 from cfd_trading.core.errors import AuthenticationError
 from cfd_trading.core.errors import NotSupported
 
-from cfd_trading.indicators import supertrend
+from cfd_trading.indicators import supertrend, vpoc
 
+from cfd_trading.feed.dukascopy import DukasCopy
 from cfd_trading.ig import IG, IGMonitor
 
 brokers = ['IG',]
@@ -26,6 +27,9 @@ core = [
 
 indicators = [
     'supertrend',
+    'vpoc'
     ]
 
-__all__ = core + errors.__all__ + brokers + monitors + indicators
+feed = ['DukasCopy']
+
+__all__ = core + errors.__all__ + brokers + monitors + indicators + feed

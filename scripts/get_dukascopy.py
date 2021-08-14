@@ -6,7 +6,7 @@ from datetime import date
 from findatapy.market import Market, MarketDataRequest, MarketDataGenerator
 
 
-class DukasCopy:
+class DukasCopy(object):
 
     EXTENTION = '.gzip'
     PATH = './data'
