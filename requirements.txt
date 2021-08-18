@@ -10,7 +10,6 @@ cryptography==3.4.7
 cycler==0.10.0
 idna==2.10
 kiwisolver==1.3.1
-matplotlib==3.4.1
 mplfinance==0.12.7a17
 multidict==5.1.0
 munch==2.5.0
@@ -40,8 +39,14 @@ sqlalchemy
 # broker api
 trading-ig
 
+# backtesting
+backtracker
+
 # historical data
 yfinance
+
+# plotting 
+matplotlib==3.2.2 # Higher versions have bug when plotting
 
 # technical analisis
 ta
