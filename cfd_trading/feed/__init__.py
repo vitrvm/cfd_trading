@@ -11,7 +11,7 @@ class Feeder(object):
     name = None
     version = None
 
-    data_path = './data'
+    data_path = './data/nq100'
     extensions = {'sqlite3':'db', 'csv':'csv'}
     filename = None
 
@@ -70,6 +70,7 @@ class Feeder(object):
         if self.freq not in ['tick', 'candle']:
             raise Exception(f"Freq type is not in {['tick', 'candle']}")
 
+    def update(self):
         self.save(self.start())
 
     def __str__(self):
@@ -95,10 +96,11 @@ class Feeder(object):
             return df['Date'][0]
 
     def save(self, df:pd.DataFrame):
+        print(f"Saving data to {self.format}")
         if self.format == 'sqlite3':
             df.to_sql(f'{self.ticker}', self.__conn, if_exists='append')
         if self.format == 'csv':
-            pass
+            df.to_csv(f'{self.ticker}')
 
     def set_format(self):
         if self.format is None:

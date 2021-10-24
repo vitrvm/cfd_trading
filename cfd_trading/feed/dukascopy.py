@@ -12,8 +12,8 @@ class DukasCopy(Feeder):
 
     :param filename: Filename
     :param format: 'sqlite', 'csv', default 'csv' 
-    :param start_date: str, default None format 'YYYY MM DD' e.g:'2021 01 31'
-    :param finish_date: str, default None format 'YYYY MM DD' e.g:'2021 01 31'
+    :param start_date: str, default None format 'YYYY-MM-DD' e.g:'2021-01-31'
+    :param finish_date: str, default None format 'YYYY-MM-DD' e.g:'2021-01-31'
     :param ticker: str, default None official ticker....
     :param fields: list
     """
@@ -25,6 +25,8 @@ class DukasCopy(Feeder):
 
             'epics': {
                 'NASDAQ': 'USATECHIDXUSD',
+                'SP500': 'USA500IDXUSD',
+                'DAX40': 'DEUIDXEUR'
             },
 
             'fields': {
@@ -42,7 +44,7 @@ class DukasCopy(Feeder):
     def format_date(self, date):
         if date is not None:
             if isinstance(date, str):
-                date = (dt.datetime.strptime(date, "%Y %m %d")).strftime("%d %b %Y")
+                date = (dt.datetime.strptime(date, "%Y-%m-%d")).strftime("%d %b %Y")
             if isinstance(date, dt.datetime):
                 date = date.strftime("%d %b %Y")
             if isinstance(date, pd.Timestamp):
