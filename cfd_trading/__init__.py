@@ -12,6 +12,8 @@ from cfd_trading.core.errors import NotSupported
 
 from cfd_trading.indicators import supertrend, vpoc
 
+from cfd_trading.db.ddbb import DataBase
+
 from cfd_trading.feed.dukascopy import DukasCopy
 from cfd_trading.ig import IG, IGMonitor
 
@@ -25,6 +27,8 @@ core = [
     'BasicMonitor'
 ]
 
+db = ['DataBase',]
+
 indicators = [
     'supertrend',
     'vpoc'
@@ -32,4 +36,4 @@ indicators = [
 
 feed = ['DukasCopy']
 
-__all__ = core + errors.__all__ + brokers + monitors + indicators + feed
+__all__ = core + errors.__all__ + brokers + monitors + indicators + feed + db
