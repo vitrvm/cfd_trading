@@ -1,5 +1,6 @@
 import os
 import sqlite3 as sql
+import pandas as pd
 
 
 class DataBase(object):
@@ -11,7 +12,7 @@ class DataBase(object):
 
         self.__conn = None
         try:
-            self.__conn = sql.connect(os.path.join())
+            self.__conn = sql.connect(os.path.join(self.__path, f"{self.__filename}.db"))
         except Exception as e:
             print(e)
 
@@ -32,15 +33,20 @@ class DataBase(object):
 
     def __execute_n_commit(self, query):
         self.__c.execute(query)
-        self.__conn.commit(query)
+        self.__conn.commit()
 
+    def get_last_row(self):
+        query = f'SELECT * FROM {self.__ticker} WHERE ROWID = (SELECT MAX(ROWID) FROM {self.__ticker})'
 
-    def get_last_entry(self, ticker):
-        query = f'SELECT * FROM {ticker} WHERE ROWID = (SELECT MAX(ROWID) FROM {ticker})'
+        df = pd.read_sql_query(query, self.__conn, parse_dates='Date')
 
-        self.__c.execute(query)
+        assert(type(df['Date'][0]) is pd.Timestamp)
 
-        result = self.__c.fetchall()
+        return df['Date'][0]
 
-        return result
-
+    def add_row(self, item):
+        query = f'''
+            INSERT INTO "{self.__ticker}"("Date","Ask","Bid","AskVolume","BidVolume") 
+            VALUES (NULL,NULL,NULL,NULL,NULL);
+        '''
+        pass
