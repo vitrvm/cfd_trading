@@ -10,6 +10,8 @@ from cfd_trading.core.errors import BrokerError
 from cfd_trading.core.errors import AuthenticationError
 from cfd_trading.core.errors import NotSupported
 
+from cfd_trading.db.ddbb import DataBase
+
 from cfd_trading.indicators import supertrend
 
 from cfd_trading.ig import IG, IGMonitor
@@ -24,8 +26,10 @@ core = [
     'BasicMonitor'
 ]
 
+db = ['DataBase',]
+
 indicators = [
     'supertrend',
     ]
 
-__all__ = core + errors.__all__ + brokers + monitors + indicators
+__all__ = core + errors.__all__ + brokers + monitors + indicators + db

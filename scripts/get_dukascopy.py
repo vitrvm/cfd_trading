@@ -1,9 +1,10 @@
 import pandas as pd
 import os
-import sqlite3 as sql
 
 from datetime import date
 from findatapy.market import Market, MarketDataRequest, MarketDataGenerator
+
+from cfd_trading import DataBase
 
 
 class DukasCopy:
@@ -33,7 +34,7 @@ class DukasCopy:
 
         self.__last_df = pd.DataFrame()
 
-        self.__conn = self.init_sql_conn()
+        self.__db = DataBase()
 
         if self.__start_date is None:
             last_date = self.get_last_date()
